@@ -31,18 +31,18 @@ Clone this repository
 
     .. code-block:: console
 
-      conda env create -f docs/env/conda_env_py36_[osx64|i686].yml
+        conda env create -f docs/env/conda_env_py36_[osx64|i686].yml
 
 *or*
 
  b. Create a new environment from scratch and let ``pip`` figure out dependencies and you sort out potential issues
 
-  .. code-block:: console
+    .. code-block:: console
 
-    conda create -n plasticc
-    source activate plasticc
-    [pip install six] # you might need this if you get errors about six not being available
-    pip install -r requirements.txt
+        conda create -n plasticc
+        source activate plasticc
+        [pip install six] # you might need this if you get errors about six not being available
+        pip install -r requirements.txt
 
 
 3. Run the notebooks:
