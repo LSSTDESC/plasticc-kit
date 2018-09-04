@@ -27,7 +27,7 @@ Clone this repository
 2. Install everything:
 ~~~~~~~~~~~~~~~~~~~~~~
 
- a. Create a new environment from the YAML specification (Preferred! All dependencies resolved!)
+ a. Create a new environment from the YAML specification
 
     .. code-block:: console
 
@@ -35,7 +35,7 @@ Clone this repository
 
 *or*
 
- b. Create a new environment from scratch (Let pip figure out dependencies and you sort out potential issues)
+ b. Create a new environment from scratch and let ``pip`` figure out dependencies and you sort out potential issues
 
   .. code-block:: console
 
@@ -43,3 +43,41 @@ Clone this repository
     source activate plasticc
     [pip install six] # you might need this if you get errors about six not being available
     pip install -r requirements.txt
+
+
+3. Run the notebooks:
+~~~~~~~~~~~~~~~~~~~~~
+
+Start the notebook
+
+.. code-block:: console
+
+    jupyter notebook plasticc_astro_starter_kit.ipynb
+
+
+4. Troubleshooting:
+~~~~~~~~~~~~~~~~~~~
+
+If you still get errors about missing packages when you run the notebook
+ - make sure you executed the ``source activate plasticc`` command in step 2.
+ - check that ``jupyter`` is using the right kernel with the ``Kernel > Change Kernel`` menu item and selecting the one with ``plasticc`` in the name
+
+If for some reason you can't find a kernel with ``plasticc`` in the name, then inside the ``plasticc`` environment:
+
+ a. install ``ipykernel`` and register the ``plasticc`` environment:
+
+    .. code-block:: console
+
+        conda install ipykernel
+        python -m ipykernel install --user --name plasticc --display-name "Python (plasticc)"
+
+*or*
+
+ b. install the ``nb_conda`` package and let ``conda`` manage integration with Jupyter
+
+    .. code-block:: console
+
+        source deactivate
+        conda install nb_conda
+        source activate plasticc
+
