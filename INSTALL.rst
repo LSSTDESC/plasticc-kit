@@ -31,7 +31,7 @@ Clone this repository
 
     .. code-block:: console
 
-        conda env create -f docs/env/conda_env_py36_[osx64|i686].yml
+        conda env create -f conda_env_py36_[osx64|i686].yml
 
 *or*
 
