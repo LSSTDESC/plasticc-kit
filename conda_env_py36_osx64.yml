@@ -9,7 +9,7 @@ dependencies:
   - appdirs=1.4.3=py36h28b3542_0
   - appnope=0.1.0=py36hf537a9a_0
   - asn1crypto=0.24.0=py36_0
-  - astropy=3.0.4=py36h1de35cc_0
+  - astropy=3.0.5=py36h1de35cc_0
   - atomicwrites=1.2.0=py36_0
   - attrs=18.1.0=py36_0
   - automat=0.7.0=py36_0
@@ -141,5 +141,4 @@ dependencies:
     - dask==0.19.0
     - gatspy==0.3
     - toolz==0.9.0
-prefix: /Users/gnarayan/anaconda3/envs/plasticc
 

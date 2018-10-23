@@ -1,4 +1,4 @@
-astropy==3.0.4
+astropy==3.0.5
 cesium==0.9.6
 Cython==0.28.5
 gatspy==0.3
