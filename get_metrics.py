@@ -195,30 +195,44 @@ if original:
 # Now we are working with challenge entries
 else:
 
-	name = '1_Kyle' #'3_MajorTom' #2_MikeSilogram' #'1_Kyle'
+	name = '3_MajorTom' #2_MikeSilogram' #'1_Kyle'
 	print(name)
-	Rprob = pd.read_csv('/Users/reneehlozek/Dropbox/First_10_submissions/'+name+'.csv') #, nrows=20)
-	Rtruth = pd.read_csv('/Users/reneehlozek/Dropbox/First_10_submissions/'+name+'_truth.csv') #, nrows=20)
+	Rprob = pd.read_csv('/Users/reneehlozek/Dropbox/First_10_submissions/'+name+'.csv', nrows=20)
+	print(Rprob)
+	Rtruth = pd.read_csv('/Users/reneehlozek/Dropbox/First_10_submissions/'+name+'_truth.csv', nrows=20)
+	print(Rtruth)
 	weightinds=[51,60,4,91,99]
 	weightvals = 2
-	obj_truth = np.shape(Rtruth)[0]
-	nlines=obj_truth
-	nclass_truth = np.shape(Rtruth)[1]-1
 	Rcols=Rprob.columns.tolist()
-	print('hey renee')
-	print(Rcols)
+	Rtruthcols=Rtruth.columns.tolist()
+	
 
 	# Removing the object ID from the list
 	if name == '3_MajorTom':
 		Rcols.pop(-1)
+		Rtruthcols.pop(-1)
+		Rtruthcols.pop(0)
 	if name == '1_Kyle':
 		Rcols.pop(0)
+		Rtruthcols.pop(1)
+		Rtruthcols.pop(0)
 	if name == '2_MikeSilogram':
 		Rcols.pop(-2)
+		Rtruthcols.pop(-2)
+		Rtruthcols.pop(0)
 
 	labels = [int(j.split('_')[1]) for j in Rcols[:]]
-	truvalmat = np.array(Rtruth[Rcols[:]])
+	truvalmat = np.array(Rtruth[Rtruthcols[:]])
 	Rprobb = np.array(Rprob[Rcols[:]])
+
+	print(Rprobb)
+
+	print(truvalmat)
+	print('hey renee cols after')
+	print(Rcols)
+
+	print('hey renee truth cols after')
+	print(Rtruthcols)
 		
 	print(labels, 'labels')
     # Pull off the truth matrix where each column is either a one or zero
@@ -232,7 +246,11 @@ else:
 #		print(np.where(truvalmat[j]), 'where')
 		indtru[j] = np.where(truvalmat[j])[0][0]
 		try:
+			print('==============', j, '================')
 			truvals[j] = labels[indtru[j]]
+			print(indtru[j],  truvalmat[j], truvals[j], 'check truth')
+			print(labels[np.argmax(Rprobb[j,:])], np.argmax(Rprobb[j,:]),Rprobb[j,:], 'check prediction')
+
 		except:
 			print('eep')
 			print(indtru[j],  truvalmat[j], len(labels))
@@ -241,6 +259,7 @@ else:
 	predvals = [labels[np.argmax(Rprobb[j,:])] for j in range(np.shape(truvalmat)[0])]
 	indpred = [np.argmax(Rprobb[j,:]) for j in range(np.shape(truvalmat)[0])]
 
+	
 	rcm = confusion_matrix(truvals, predvals, labels=labels)
 	rcm = rcm.astype('float') / rcm.sum(axis=1)[:, np.newaxis]
 	rannot = np.around(rcm, 2)
@@ -252,7 +271,7 @@ else:
 	ax.set_aspect('equal')
 	plt.savefig('testrcm_'+name+'.png')
     
-	nclass = np.shape(truvalmat[:,:])
+	nclass = np.shape(truvalmat[:,:])[1]
 	weights = np.ones(np.shape(truvalmat[:,:])[1])
 	inds=[0,4,6,13,14]
 	weights[inds]=2
@@ -261,6 +280,9 @@ else:
 	print(nclass, 'nclass')
 	print(weights, 'weights')
 
+	print(truvalmat)
+
+	print(Rprobb)
     # The log loss function takes in matrices of truth and probability
 	logloss = plasticc_log_loss(truvalmat[:,:], Rprobb[:,:], relative_class_weights=weights)
 	print(logloss, name)
