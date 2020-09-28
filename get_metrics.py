@@ -1,3 +1,4 @@
+
 import matplotlib
 #gui_env = ['TKAgg','GTKAgg','Qt4Agg','WXAgg']
 
@@ -31,26 +32,64 @@ import seaborn as sns
 import pandas as pd
 
 
-def plasticc_log_loss(y_true, y_pred, relative_class_weights=None):
-        """
-        Implementation of weighted log loss used for the Kaggle challenge
-        """
-        predictions = y_pred.copy()
-
-        # sanitize predictions
-        epsilon = sys.float_info.epsilon # this is machine dependent but essentially prevents log(0)
-        predictions = np.clip(predictions, epsilon, 1.0 - epsilon)
-        predictions = predictions / np.sum(predictions, axis=1)[:, np.newaxis]
-
-        predictions = np.log(predictions)
+def regular_log_loss(y_true, y_pred, relative_class_weights=None):
+	"""
+	Implementation of weighted log loss used for the Kaggle challenge
+	"""
+	predictions = y_pred.copy()
+	# sanitize predictions
+	epsilon = sys.float_info.epsilon 
+	# this is machine dependent but essentially prevents log(0)
+	predictions = np.clip(predictions, epsilon, 1.0 - epsilon)
+	predictions = predictions / np.sum(predictions, axis=1)[:, np.newaxis]
+	predictions = np.log(predictions)
         # multiplying the arrays is equivalent to a truth mask as y_true only contains zeros and ones
-        class_logloss = []
-        for i in range(predictions.shape[1]):
-            # average column wise log loss with truth mask applied
-            result = np.average(predictions[:, i][y_true[:, i] == 1])
-            class_logloss.append(result)
-        return -1 * np.average(class_logloss, weights=relative_class_weights)
+	class_logloss=[]
+	uniform_class_weights= np.ones(predictions.shape[1])
+
+	for i in range(predictions.shape[1]):
+		# average column wise log loss with truth mask applies
+		result = np.average(predictions[:, i][y_true[:, i] == 1])
+		class_logloss.append(result)
+	return -1 * np.average(class_logloss, weights=uniform_class_weights)
+
+
+
+
+def plasticc_log_loss(y_true, y_pred, relative_class_weights=None):
+	"""
+	Implementation of weighted log loss used for the Kaggle challenge
+	"""
+	predictions = y_pred.copy()
+	# sanitize predictions
+	epsilon = sys.float_info.epsilon # this is machine dependent but essentially prevents log(0)
+	predictions = np.clip(predictions, epsilon, 1.0 - epsilon)
+	predictions = predictions / np.sum(predictions, axis=1)[:, np.newaxis]
+	predictions = np.log(predictions)
+        # multiplying the arrays is equivalent to a truth mask as y_true only contains zeros and ones
+	class_logloss=[]
+	for i in range(predictions.shape[1]):
+		# average column wise log loss with truth mask applies
+		result = np.average(predictions[:, i][y_true[:, i] == 1])
+		class_logloss.append(result)
+	return -1 * np.average(class_logloss, weights=relative_class_weights)
     
+
+def multiclass_brier(y_true, y_pred, relative_class_weights=None):
+	"""                                                                                                                                                                     
+        Implementation of multiclass brier for Kaggle challenge
+	"""
+
+	predictions=y_pred.copy()
+	q_each = (predictions - y_true) ** 2
+	class_brier = []
+	for i in range(predictions.shape[1]):
+		result = np.average(q_each[:, i][y_true[:, i] == 1])
+		class_brier.append(result)
+	return np.average(class_brier, weights=relative_class_weights)
+
+
+
 
 
 fig, ax = plt.subplots()
@@ -63,12 +102,16 @@ pbcols = OrderedDict([(0,'blueviolet'), (1,'green'), (2,'red'),\
 pbnames = list(pbmap.values())
 datadir = '/Users/reneehlozek/Data/plasticc/'
 metafilename = datadir+'training_set_metadata.csv'
+
+#'/Users/reneehlozek/Dropbox/First_10_submissions/submissions_renorm/validation_truth.csv'
+#
 metadata = Table.read(metafilename, format='csv')
 nobjects = len(metadata)
 counts = Counter(metadata['target'])
 labels, values = zip(*sorted(counts.items(), key=itemgetter(1)))
 nlines = len(labels)
 
+#print(labels, 'here')
 
 featurefile = datadir+'plasticc_featuretable.npz'
 if os.path.exists(featurefile):
@@ -194,27 +237,43 @@ if original:
       
 # Now we are working with challenge entries
 else:
-	name = 'mikensilogram' #kyleboone' #majortom' #2_MikeSilogram' #'1_Kyle'
-	print(name)
-	Rprob = pd.read_csv('/Users/reneehlozek/Dropbox/First_10_submissions/submissions_reformatted/'+name+'_probs.csv') #, nrows=20)
+	name ='validation' #'mikensilogram' #kyleboone' #majortom' #2_MikeSilogram' #'1_Kyle'
+
+	Rprob = pd.read_csv('/Users/reneehlozek/Dropbox/First_10_submissions/submissions_renorm/'+name+'_probs.csv') #, nrows=20)
 #	print(Rprob)
-	Rtruth = pd.read_csv('/Users/reneehlozek/Dropbox/First_10_submissions/submissions_reformatted/'+name+'_truth.csv') #, nrows=20)
-	#print(Rtruth)
-	weightinds=[51,60,4,91,99]
+	if name=='validation':
+		Rprob=Rprob.drop(['99'],axis=1)
+	#print(Rprob)
+	Rtruth = pd.read_csv('/Users/reneehlozek/Dropbox/First_10_submissions/submissions_renorm/'+name+'_truth.csv') #, nrows=20)
+#	print(Rtruth)
+	if name == 'validation':
+		weightinds=[51,60,4,91] #,99]
+		inds=[0,1,7,13]
+	else:
+		weightinds=[51,60,4,91,99]
+		inds=[0,1,7,13,14]
+
 	weightvals = 2
 	Rcols=Rprob.columns.tolist()
 	Rtruthcols=Rtruth.columns.tolist()
-	#print('hey renee cols before')
-	#print(Rcols)
+	print('hey renee cols before')
+	print(Rcols)
 
-	#print('hey renee truth cols before')
-	#print(Rtruthcols)
+	print('hey renee truth cols before')
+	print(Rtruthcols)
 		
 
 	old_adjust=False
 
 	Rcols.pop(0)
 	Rtruthcols.pop(0)
+
+	print('hey renee cols after')
+	print(Rcols)
+
+	print('hey renee truth cols after')
+	print(Rtruthcols)
+
 	if old_adjust:
 
 		# Removing the object ID from the list
@@ -230,13 +289,6 @@ else:
 			Rcols.pop(-2)
 			Rtruthcols.pop(-2)
 			Rtruthcols.pop(0)
-#	print('hey renee cols after')
-#	print(Rcols)
-
-#	print('hey renee truth cols after')
-#	print(Rtruthcols)
-
-
 
 	truthvals = np.array(Rtruth[Rtruthcols[:]])
 #	print(truvals, 'truvals')
@@ -246,7 +298,7 @@ else:
 	labels=[j for j in Rcols[:]]
 	Rprobb = np.array(Rprob[Rcols[:]])
 		
-	print(labels, 'labels')
+	print(labels,'hmm labels')
 
     # Pull off the truth matrix where each column is either a one or zero
 
@@ -297,7 +349,8 @@ else:
     
 	nclass = np.shape(truvalmat[:,:])[1]
 	weights = np.ones(np.shape(truvalmat[:,:])[1])
-	inds=[0,4,6,13,14]
+#['6', '15', '16', '42', '52', '53', '62', '64', '65', '67', '88', '90', '92', '95', '99'] labels
+
 	weights[inds]=2
 
 
@@ -308,9 +361,13 @@ else:
 
 #	print(Rprobb)
     # The log loss function takes in matrices of truth and probability
-	logloss = plasticc_log_loss(truvalmat[:,:], Rprobb[:,:], relative_class_weights=weights)
-
-	print(logloss, name)
+	plasticc_logloss = plasticc_log_loss(truvalmat[:,:], Rprobb[:,:], relative_class_weights=weights)
+	brier = multiclass_brier(truvalmat[:,:], Rprobb[:,:], relative_class_weights=weights)
+	logloss = regular_log_loss(truvalmat[:,:], Rprobb[:,:], relative_class_weights=weights)
+	print(name)
+	print(plasticc_logloss, 'plasticc_logloss')
+	print(brier, 'brier')
+	print(logloss, 'normal logloss')
 
 
 
