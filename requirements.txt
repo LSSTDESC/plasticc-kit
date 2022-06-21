@@ -4,7 +4,7 @@ Cython==0.28.5
 gatspy==0.3
 jupyter==1.0.0
 matplotlib==2.2.3
-numpy==1.15.1
+numpy==1.22.0
 pandas==0.23.4
 rise==5.4.1
 schwimmbad==0.3.0
